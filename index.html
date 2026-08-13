@@ -415,7 +415,7 @@ function fitGridToWidth(){
   const natural = grid.offsetWidth;
   if (!available || !natural) return;
   // Leave a safety margin -- iOS Safari reports widths slightly differently.
-  const usable = available - 8;
+  const usable = available - 18;
   const scale = Math.min(1, usable / natural);
   if (scale < 1){
     scaler.style.transform = `scale(${scale})`;
