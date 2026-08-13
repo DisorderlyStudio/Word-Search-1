@@ -16,7 +16,7 @@
     --found-bg:#cdeee9;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
-  html, body{ overscroll-behavior:none; }
+  html, body{ overscroll-behavior:none; overflow-x:hidden; width:100%; max-width:100%; }
   body{
     font-family: "PT Sans", Arial, Helvetica, sans-serif;
     background: var(--paper);
@@ -60,7 +60,7 @@
     text-align:center;
     font-style:italic;
     font-size:0.95rem;
-    margin:0 0 20px;
+    margin:0 0 12px;
     line-height:1.4;
   }
   #gridWrap{
@@ -98,7 +98,7 @@
     gap:10px;
     flex-wrap:wrap;
     justify-content:center;
-    margin:20px 0 8px;
+    margin:12px 0 6px;
   }
   button{
     font-family:inherit;
@@ -118,20 +118,20 @@
     min-height:1.2em;
     font-size:0.9rem;
     text-align:center;
-    margin-bottom:10px;
+    margin-bottom:4px;
   }
 
   #wordBankTitle{
     font-weight:bold;
     font-size:1.1rem;
-    margin:28px 0 14px;
+    margin:16px 0 8px;
     text-align:center;
   }
   #wordBank{
     display:grid;
     grid-template-columns:max-content max-content max-content;
-    gap:14px 36px;
-    margin:0 auto 20px;
+    gap:8px 24px;
+    margin:0 auto 12px;
     padding:0 8px;
     justify-content:center;
   }
@@ -140,7 +140,7 @@
     align-items:center;
     gap:10px;
     font-size:1rem;
-    line-height:1.4;
+    line-height:1.2;
   }
   .wb-item .dot{
     width:14px;
