@@ -411,11 +411,18 @@ function fitGridToWidth(){
   if (!wrap || !scaler || !grid) return;
   scaler.style.transform = 'none';
   scaler.style.height = '';
-  const available = wrap.clientWidth;
   const natural = grid.offsetWidth;
-  if (!available || !natural) return;
-  // Leave a safety margin -- iOS Safari reports widths slightly differently.
-  const usable = available - 18;
+  if (!natural) return;
+  // Measure against the actual visible window, not the container: on iOS Safari the
+  // container can report wider than what's really on screen, which is what let the
+  // last column end up under the scroll indicator. Then take 88% of that so the grid
+  // sits clearly inside the edge rather than right up against it.
+  const visible = Math.min(
+    wrap.clientWidth,
+    document.documentElement.clientWidth,
+    window.innerWidth || Infinity
+  );
+  const usable = visible * 0.88;
   const scale = Math.min(1, usable / natural);
   if (scale < 1){
     scaler.style.transform = `scale(${scale})`;
