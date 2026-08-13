@@ -16,7 +16,7 @@
     --found-bg:#cdeee9;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
-  html, body{ overscroll-behavior:none; }
+  html, body{ overscroll-behavior:none; overflow-x:hidden; width:100%; max-width:100%; }
   body{
     font-family: "PT Sans", Arial, Helvetica, sans-serif;
     background: var(--paper);
@@ -60,14 +60,12 @@
     text-align:center;
     font-style:italic;
     font-size:0.95rem;
-    margin:0 0 20px;
+    margin:0 0 12px;
     line-height:1.4;
   }
   #gridWrap{
     width:100%;
     max-width:520px;
-    overflow-x:auto;
-    padding-bottom:4px;
     touch-action:none;
   }
   #grid{
@@ -81,30 +79,26 @@
     -webkit-user-select:none;
   }
   .letter{
-    width:22px;
-    height:22px;
+    width:var(--cell-size, 22px);
+    height:var(--cell-size, 22px);
     background:white;
     display:flex;
     align-items:center;
     justify-content:center;
     font-weight:bold;
-    font-size:12px;
+    font-size:var(--cell-font, 12px);
     cursor:pointer;
   }
   .letter.selecting{ background:var(--highlight); }
   .letter.found{ background:var(--found-bg); color:var(--accent); }
   .letter.wrong{ background:#fbe0cf; color:var(--wrong); }
 
-  @media (min-width:480px){
-    .letter{ width:26px; height:26px; font-size:14px; }
-  }
-
   #controls{
     display:flex;
     gap:10px;
     flex-wrap:wrap;
     justify-content:center;
-    margin:20px 0 8px;
+    margin:12px 0 6px;
   }
   button{
     font-family:inherit;
@@ -124,20 +118,20 @@
     min-height:1.2em;
     font-size:0.9rem;
     text-align:center;
-    margin-bottom:10px;
+    margin-bottom:4px;
   }
 
   #wordBankTitle{
     font-weight:bold;
     font-size:1.1rem;
-    margin:28px 0 14px;
+    margin:16px 0 8px;
     text-align:center;
   }
   #wordBank{
     display:grid;
     grid-template-columns:max-content max-content max-content;
-    gap:14px 36px;
-    margin:0 auto 20px;
+    gap:8px 24px;
+    margin:0 auto 12px;
     padding:0 8px;
     justify-content:center;
   }
@@ -146,7 +140,7 @@
     align-items:center;
     gap:10px;
     font-size:1rem;
-    line-height:1.4;
+    line-height:1.2;
   }
   .wb-item .dot{
     width:14px;
@@ -208,6 +202,21 @@ const gridEl = document.getElementById('grid');
 gridEl.style.gridTemplateColumns = `repeat(${W}, auto)`;
 gridEl.style.gridTemplateRows = `repeat(${H}, auto)`;
 
+// Size cells to the real measured width so the grid never overflows
+// (no horizontal scroll needed, so touch-action:none on the wrap can't trap it)
+function sizeGrid(){
+  const wrap = document.getElementById('gridWrap');
+  const available = wrap.clientWidth;
+  const chrome = (W - 1) * 1 + 6; // gaps + border
+  let cell = Math.floor((available - chrome) / W);
+  cell = Math.max(14, Math.min(26, cell));
+  const font = Math.max(9, Math.round(cell * 0.58));
+  document.documentElement.style.setProperty('--cell-size', cell + 'px');
+  document.documentElement.style.setProperty('--cell-font', font + 'px');
+}
+window.addEventListener('resize', sizeGrid);
+window.addEventListener('orientationchange', () => setTimeout(sizeGrid, 50));
+
 const cellEls = []; // [r][c] -> div
 for (let r = 0; r < H; r++){
   const row = [];
@@ -222,6 +231,7 @@ for (let r = 0; r < H; r++){
   }
   cellEls.push(row);
 }
+sizeGrid();
 
 function cellsForSolution(word){
   const [r, c, dr, dc] = SOLUTIONS[word];
