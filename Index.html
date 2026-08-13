@@ -16,7 +16,6 @@
     --found-bg:#cdeee9;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
-  html, body{ max-width:100%; overflow-x:hidden; }
   html, body{ overscroll-behavior:none; }
   body{
     font-family: "PT Sans", Arial, Helvetica, sans-serif;
@@ -67,11 +66,7 @@
   #gridWrap{
     width:100%;
     max-width:520px;
-    padding-bottom:4px;
     touch-action:none;
-  }
-  #gridScaler{
-    transform-origin: top left;
   }
   #grid{
     display:grid;
@@ -84,23 +79,19 @@
     -webkit-user-select:none;
   }
   .letter{
-    width:22px;
-    height:22px;
+    width:var(--cell-size, 22px);
+    height:var(--cell-size, 22px);
     background:white;
     display:flex;
     align-items:center;
     justify-content:center;
     font-weight:bold;
-    font-size:12px;
+    font-size:var(--cell-font, 12px);
     cursor:pointer;
   }
   .letter.selecting{ background:var(--highlight); }
   .letter.found{ background:var(--found-bg); color:var(--accent); }
   .letter.wrong{ background:#fbe0cf; color:var(--wrong); }
-
-  @media (min-width:480px){
-    .letter{ width:26px; height:26px; font-size:14px; }
-  }
 
   #controls{
     display:flex;
@@ -184,7 +175,7 @@
 <p class="instructions">Somewhere in this grid are fifteen things that live in this book. Words run left&ndash;right, top&ndash;bottom, and diagonally &mdash; forwards or backwards. Click and drag (or swipe) across a word to find it. Your progress saves automatically on this device.</p>
 
 <div id="gridWrap">
-  <div id="gridScaler"><div id="grid"></div></div>
+  <div id="grid"></div>
 </div>
 
 <div id="status"></div>
@@ -211,6 +202,21 @@ const gridEl = document.getElementById('grid');
 gridEl.style.gridTemplateColumns = `repeat(${W}, auto)`;
 gridEl.style.gridTemplateRows = `repeat(${H}, auto)`;
 
+// Size cells to the real measured width so the grid never overflows
+// (no horizontal scroll needed, so touch-action:none on the wrap can't trap it)
+function sizeGrid(){
+  const wrap = document.getElementById('gridWrap');
+  const available = wrap.clientWidth;
+  const chrome = (W - 1) * 1 + 6; // gaps + border
+  let cell = Math.floor((available - chrome) / W);
+  cell = Math.max(14, Math.min(26, cell));
+  const font = Math.max(9, Math.round(cell * 0.58));
+  document.documentElement.style.setProperty('--cell-size', cell + 'px');
+  document.documentElement.style.setProperty('--cell-font', font + 'px');
+}
+window.addEventListener('resize', sizeGrid);
+window.addEventListener('orientationchange', () => setTimeout(sizeGrid, 50));
+
 const cellEls = []; // [r][c] -> div
 for (let r = 0; r < H; r++){
   const row = [];
@@ -225,6 +231,7 @@ for (let r = 0; r < H; r++){
   }
   cellEls.push(row);
 }
+sizeGrid();
 
 function cellsForSolution(word){
   const [r, c, dr, dc] = SOLUTIONS[word];
@@ -402,37 +409,6 @@ function loadProgress(){
   } catch(e){}
 }
 loadProgress();
-
-// Scale the grid down to fit narrow screens instead of forcing horizontal scrolling.
-function fitGridToWidth(){
-  const wrap = document.getElementById('gridWrap');
-  const scaler = document.getElementById('gridScaler');
-  const grid = document.getElementById('grid');
-  if (!wrap || !scaler || !grid) return;
-  scaler.style.transform = 'none';
-  scaler.style.height = '';
-  const natural = grid.offsetWidth;
-  if (!natural) return;
-  // Measure against the actual visible window, not the container: on iOS Safari the
-  // container can report wider than what's really on screen, which is what let the
-  // last column end up under the scroll indicator. Then take 88% of that so the grid
-  // sits clearly inside the edge rather than right up against it.
-  const visible = Math.min(
-    wrap.clientWidth,
-    document.documentElement.clientWidth,
-    window.innerWidth || Infinity
-  );
-  const usable = visible * 0.88;
-  const scale = Math.min(1, usable / natural);
-  if (scale < 1){
-    scaler.style.transform = `scale(${scale})`;
-    scaler.style.height = (grid.offsetHeight * scale) + 'px';
-  }
-}
-window.addEventListener('load', fitGridToWidth);
-window.addEventListener('resize', fitGridToWidth);
-fitGridToWidth();
-
 </script>
 
 </body>
