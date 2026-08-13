@@ -16,6 +16,7 @@
     --found-bg:#cdeee9;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html, body{ max-width:100%; overflow-x:hidden; }
   html, body{ overscroll-behavior:none; }
   body{
     font-family: "PT Sans", Arial, Helvetica, sans-serif;
@@ -413,7 +414,9 @@ function fitGridToWidth(){
   const available = wrap.clientWidth;
   const natural = grid.offsetWidth;
   if (!available || !natural) return;
-  const scale = Math.min(1, available / natural);
+  // Leave a safety margin -- iOS Safari reports widths slightly differently.
+  const usable = available - 18;
+  const scale = Math.min(1, usable / natural);
   if (scale < 1){
     scaler.style.transform = `scale(${scale})`;
     scaler.style.height = (grid.offsetHeight * scale) + 'px';
